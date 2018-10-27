@@ -110,7 +110,7 @@ def Update_prices(current_prices,base,dates_map,cities_map):
     data = ""
     for i,j,k in zip(aux[0],aux[1],aux[2]):
         data += str(cities_map[i]) + "," + str(cities_map[j]) + "," + dates_map[k] + "," + str(np.round(current_prices[i,j,k])) + "\n"
-    with open("data_stream.csv","w") as f:
+    with open("flights_stream.csv","w") as f:
         f.write(data)
     return current_prices
 
@@ -157,7 +157,7 @@ def create_data(D,d):
     prices, base_prices, dprices = Initialize_prices(N_cities,D,d,cities_map)
     data = send_stream(dprices)
     #Write csv file
-    with open("data_stream.csv","w") as f:
+    with open("flights_stream.csv","w") as f:
         f.write(data)
     return prices,base_prices,dprices,cities_map
 

@@ -11,7 +11,7 @@ popular_EU_locations = ['Berlin, Germany', 'Paris, France', 'Amsterdam, Netherla
                 'Copenhagen, Denmark', 'Dublin, Ireland', 'Prague, Czech Republic', 'Rome, Italy', 'Budapest, Hungary']
 
 #write records in file
-if os.path.exists("test.csv"):
+if os.path.exists("songkick_stream.csv"):
   os.remove("test.csv")
 else:
   print("The file does not exist")
