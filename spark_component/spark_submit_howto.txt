@@ -1,0 +1,8 @@
+
+** spark version used: spark-2.3.1-hadoop2.7
+** scala 2.11
+
+1. Move inside "spark_component" folder
+2. Execute: sbt package
+3. Move inside "spark-2.3.1-bin-hadoop2.7/bin/" folder
+4. Execute spark-submit --class FlightGigs <path to spark_component folder>/target/scala-2.11/spark_project_2.11-1.0.jar
