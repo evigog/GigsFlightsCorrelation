@@ -12,11 +12,11 @@ popular_EU_locations = ['Berlin, Germany', 'Paris, France', 'Amsterdam, Netherla
 
 #write records in file
 if os.path.exists("songkick_stream.csv"):
-  os.remove("test.csv")
+  os.remove("songkick_stream.csv")
 else:
   print("The file does not exist")
 
-with open('test.csv','a') as file:
+with open('songkick_stream.csv','a') as file:
     csv_out=csv.writer(file)
     csv_out.writerow(('concert_id', 'artist', 'date', 'city'))
     concert_id = 0 
