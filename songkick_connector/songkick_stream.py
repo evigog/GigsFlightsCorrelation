@@ -1,5 +1,7 @@
 from songkick import *
 from datetime import date
+import time
+import datetime
 import csv
 import os
 
@@ -11,13 +13,17 @@ targeted_artists = ['Mumford & Sons','Godsmack','The Vaccines','Bon Iver','Distu
 popular_EU_locations = ['Berlin, Germany', 'Paris, France', 'Amsterdam, Netherlands', 'Barcelona, Spain', 
                 'Copenhagen, Denmark', 'Dublin, Ireland', 'Prague, Czech Republic', 'Rome, Italy', 'Budapest, Hungary']
 
-#write records in file
-if os.path.exists("spark_component/data/songkick_data/songkick_stream.csv"):
-  os.remove("spark_component/data/songkick_data/songkick_stream.csv")
-else:
-  print("The file does not exist")
 
-with open('songkick_stream.csv','a') as file:
+
+
+while True:
+  #write records in file
+  if os.path.exists("spark_component/data/songkick_data/songkick_stream.csv"):
+    os.remove("spark_component/data/songkick_data/songkick_stream.csv")
+  else:
+    print("The file does not exist")
+
+  with open('songkick_stream.csv','a') as file:
     csv_out=csv.writer(file)
     csv_out.writerow(('concert_id', 'artist', 'date', 'city'))
     concert_id = 0 
@@ -38,3 +44,8 @@ with open('songkick_stream.csv','a') as file:
                 record = (concert_id, artist_val, date_val, city_val)
                 csv_out.writerow(record)
                 concert_id += 1
+      
+  print("Events updated at ",datetime.datetime.now())
+  time.sleep(5)
+
+
