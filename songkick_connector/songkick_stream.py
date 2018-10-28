@@ -6,7 +6,8 @@ import os
 songkick = Songkick(api_key="8lHl4On4OYjHSxtr")
 
 targeted_artists = ['Mumford & Sons','Godsmack','The Vaccines','Bon Iver','Disturbed','Pink','Rod Stewart',
-                    'Lana del Rey','Post Malone','Dave Matthews Band','Welshly Arms']
+                    'Lana del Rey','Post Malone','Dave Matthews Band','Welshly Arms','Tool','Beirut',
+                    'Hot Chip','Manowar','Westlife','Tiësto','Blue October','Yann Tiersen']
 popular_EU_locations = ['Berlin, Germany', 'Paris, France', 'Amsterdam, Netherlands', 'Barcelona, Spain', 
                 'Copenhagen, Denmark', 'Dublin, Ireland', 'Prague, Czech Republic', 'Rome, Italy', 'Budapest, Hungary']
 
