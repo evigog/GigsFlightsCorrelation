@@ -12,8 +12,8 @@ popular_EU_locations = ['Berlin, Germany', 'Paris, France', 'Amsterdam, Netherla
                 'Copenhagen, Denmark', 'Dublin, Ireland', 'Prague, Czech Republic', 'Rome, Italy', 'Budapest, Hungary']
 
 #write records in file
-if os.path.exists("songkick_stream.csv"):
-  os.remove("songkick_stream.csv")
+if os.path.exists("spark_component/data/songkick_data/songkick_stream.csv"):
+  os.remove("spark_component/data/songkick_data/songkick_stream.csv")
 else:
   print("The file does not exist")
 
