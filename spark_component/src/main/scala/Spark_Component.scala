@@ -1,72 +1,77 @@
 import org.apache.spark._
 import org.apache.spark.streaming._
+import org.joda.time.DateTime
+import java.util.{Calendar, Date}
+import java.text.SimpleDateFormat
 
 object FlightGigs{
 	def main(args: Array[String]) {
 
-		// create Streaming context
-		val ssc = new StreamingContext("local[2]", "FlightGigsStream", Seconds(10),
-      System.getenv("SPARK_HOME"), StreamingContext.jarOfClass(this.getClass).toSeq)
+    // create Streaming context
+    val conf = new SparkConf().setAppName("FlightGigsStream").setMaster("local[2]")
+		val ssc = new StreamingContext(conf, Seconds(1))
 
     //checkpointing is necessary
     ssc.checkpoint("ckpt")
 
-    	// create Songkick Stream from csv 
-      // /Users/evi/Documents/KTH_ML/Period_5/DataIntensiveComputing/Project/
-    	val gigs_stream = ssc.textFileStream("data/songkick_data") 
-      
-      case class Event(
-      concert_id: Integer,
-      artist: String,
-      event_date: Long,
-      event_city: String
-      )
+    // create Songkick Stream from csv 
+    // /Users/evi/Documents/KTH_ML/Period_5/DataIntensiveComputing/Project/
+    val gigs_stream = ssc.textFileStream("file:///mnt/c/Users/horst/Documents/KTH/3RD/ID2221/project/GigsFlightsCorrelation/spark_component/data/songkick_data") 
+    
+    case class Event(
+    concert_id: Integer,
+    artist: String,
+    event_date: DateTime,
+    event_city: String
+    )
 
-      val gigs_data = gigs_stream map { line =>
-      val Array(concert_id, artist, event_date, event_city) = line.split('\t')
+		val gigs_data = gigs_stream map { line =>
+		val Array(concert_id, artist, event_date, event_city ) = line.split(",")
+		val event_obj = Event(concert_id.toInt, artist, DateTime.parse(event_date), event_city)
+		event_city -> event_obj
+		}
 
-      val event_obj = Event(concert_id.toInt, artist, event_date.toLong, event_city)
-      event_city -> event_obj
-      }
+    gigs_data.print()
 
-      //gigs_data.saveAsTextFiles("output")
+    //gigs_data.saveAsTextFiles("output")
 
-      // create Flight Stream from csv
-      val flight_stream = ssc.textFileStream("data/flight_data") 
+    // create Flight Stream from csv
+    val flight_stream = ssc.textFileStream("file:///mnt/c/Users/horst/Documents/KTH/3RD/ID2221/project/GigsFlightsCorrelation/spark_component/data/flight_data") 
 
-      case class Flight_Info(
-      start: String,
-      end: String,
-      flight_date: Long,
-      price: Double
-      )
+    case class Flight_Info(
+    start: String,
+    end: String,
+    flight_date: DateTime,
+    price: Double
+    )
 
-      val flight_data = flight_stream map { line =>
-      val Array(start, end, flight_date, price) = line.split('\t')
-
-      val flight_obj = Flight_Info(start, end, flight_date.toLong, price.toDouble)
-      end -> flight_obj
-      }
-      //flight_data.print()
+    val flight_data = flight_stream map { line =>
+    val Array(start, end, flight_date, price) = line.split(",")
+    val flight_obj = Flight_Info(start, end, DateTime.parse(flight_date), price.toDouble)
+    end -> flight_obj
+    }
+    
+    flight_data.print()
 
     // STEP1: window the streams
-   // val gigs_window = gigs_data.window(Minutes(5))  // window size multiple of batch interval!
+    //val gigs_window = gigs_data.window(Minutes(5))  // window size multiple of batch interval!
     //val flight_window = flight_data.window(Seconds(10)) // window size multiple of batch interval!
-
 
     // STEP2: join the two streams on the event_city, end
     val gig_flight_joined = gigs_data.join(flight_data) //result: (event_city, event_obj, flight_obj)
 
     // STEP3: filter data on flight period (concert_date-2, concert_date)
-    val gig_flight_flight_period = gig_flight_joined.filter(tuple => tuple._2._2.flight_date >= tuple._2._1.event_date-2 & tuple._2._2.flight_date < tuple._2._1.event_date)
-
+    val gig_flight_flight_period = (gig_flight_joined.filter(tuple => 
+    tuple._2._2.flight_date.isAfter(tuple._2._1.event_date.minusDays(2)) &&
+    tuple._2._2.flight_date.isBefore(tuple._2._1.event_date)))
+    
     gig_flight_flight_period.print()
 
     // STEP4: change key to (event_city,event_date)
-    val gig_flight =  gig_flight_flight_period.map(tuple => ( (tuple._1, tuple._2._1.event_date), (tuple._2._1, tuple._2._2)) )  
+    val gig_flight =  gig_flight_flight_period.map(tuple => ((tuple._1, tuple._2._1.event_date), (tuple._2._1, tuple._2._2)))  
 
     // STEP5: compute avg price per different key and updateState
-    val update_state = (key: (String,Long), value: Option[(Event, Flight_Info)], state: State[(Double, Integer)]) => {
+    val update_state = (key: (String,DateTime), value: Option[(Event, Flight_Info)], state: State[(Double, Integer)]) => {
         val newPrice_any = value.getOrElse(0) //Any type
         val newPrice = { newPrice_any match {
               case tuple @ (a: Event, b: Flight_Info) => b.price
@@ -85,17 +90,13 @@ object FlightGigs{
 
     val avg_price_stream = gig_flight.mapWithState(StateSpec.function(update_state))
 
+    print("Hereeeeeeeeeeeeeee ",avg_price_stream.print())
+
     // save result 
-   avg_price_stream.saveAsTextFiles("output")
-
-
-
-
+    avg_price_stream.saveAsTextFiles("output")
 
     ssc.start()
     ssc.awaitTermination()
-
-
 
 	}
 

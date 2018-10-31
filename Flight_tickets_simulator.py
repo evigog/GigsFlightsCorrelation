@@ -1,5 +1,7 @@
 import numpy as np
 import time
+import os
+import stat
 import datetime
 
 def map_date(t,D):
@@ -8,10 +10,21 @@ def map_date(t,D):
         t >> current date in format: dd/mm/yy \n
         D >> the amount of days we are going to track flights\n
     """
-    day,month,year = map(int,t.split("/"))
+    year,month,day = map(int,t.split("-"))
     dates = {}
     for i in range(D):
-        aux = str(day) + "/" + str(month) + "/" + str(year)
+        
+        if (month < 10) :
+            maux = "0" + str(month)
+        else:
+            maux = month
+
+        if (day < 10) : 
+            daux = "0" + str(day)
+        else:
+            daux = day
+
+        aux = str(year) + "-" + str(maux) + "-" + str(daux)
         dates.update({i:aux})
         if((day==31 and (month==1 or month==3 or month==5 or month==7 or month==8 or month==10 or month==12)) or \
         (day==30 and (month==4 or month==6 or month==9 or month==11)) or \
@@ -87,7 +100,7 @@ def Initialize_prices(N,D,d,cm):
                 ticket_prices[i,j] = flight_singleDestination
     return ticket_prices,base_prices,end_prices
 
-def Update_prices(current_prices,base,dates_map,cities_map):
+def Update_prices(current_prices,base,dates_map,cities_map,fname):
     """
         Update price of flight tickets tracked (Only some of them will be updated, not all)\n
         Selection of flights to update done randomly\n
@@ -95,6 +108,7 @@ def Update_prices(current_prices,base,dates_map,cities_map):
         base >> Flights base prices(oer destination)\n
         dates_map >> iddates vs dates map\n
         cities_map >> idcities vs cities map\n
+        fname >> generated csv file name\n 
     """
     old_prices = np.copy(current_prices)
     #Increase the prices randomly
@@ -110,7 +124,7 @@ def Update_prices(current_prices,base,dates_map,cities_map):
     data = ""
     for i,j,k in zip(aux[0],aux[1],aux[2]):
         data += str(cities_map[i]) + "," + str(cities_map[j]) + "," + dates_map[k] + "," + str(np.round(current_prices[i,j,k])) + "\n"
-    with open("spark_component/data/flight_data/flights_stream.csv","w") as f:
+    with open(fname,"w") as f:
         f.write(data)
     return current_prices
 
@@ -171,17 +185,26 @@ def update_data(current_prices,base,date,D,ctmap):
         ctmap >> id cities vs cities map\n
     """
     mdate = map_date(date,D)
-    prices = Update_prices(current_prices,base,mdate,ctmap)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")  
+    fname = "spark_component/data/flight_data/flights_stream-" + str(timestamp) + ".csv"
+    prices = Update_prices(current_prices,base,mdate,ctmap,fname)
     return prices
 
-track_days = 60
-init_date = "10/10/18"
+track_days = 360
+init_date = "2018-10-31"
 
 prices_matrix, base_prices, prices_dict, cities_map = create_data(track_days,init_date)
 while True:
+    path = "/mnt/c/Users/horst/Documents/KTH/3RD/ID2221/project/GigsFlightsCorrelation/spark_component/data/flight_data/"
+    for file in os.listdir(path):
+        aux = path + file
+        if((time.time() - os.stat(aux)[stat.ST_MTIME]) > 600):
+            os.remove(aux)
+            print("Old file removed ",aux)
+
     update_data(prices_matrix,base_prices,init_date,track_days,cities_map)
     print("Prices updated at ",datetime.datetime.now())
-    time.sleep(5)
+    time.sleep(120)
     
 
 
