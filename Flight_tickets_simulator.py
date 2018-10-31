@@ -195,16 +195,16 @@ init_date = "2018-10-31"
 
 prices_matrix, base_prices, prices_dict, cities_map = create_data(track_days,init_date)
 while True:
-    path = "/mnt/c/Users/horst/Documents/KTH/3RD/ID2221/project/GigsFlightsCorrelation/spark_component/data/flight_data/"
+    path = "spark_component/data/flight_data/"
     for file in os.listdir(path):
         aux = path + file
-        if((time.time() - os.stat(aux)[stat.ST_MTIME]) > 600):
+        if((time.time() - os.stat(aux)[stat.ST_MTIME]) > 200):
             os.remove(aux)
             print("Old file removed ",aux)
 
     update_data(prices_matrix,base_prices,init_date,track_days,cities_map)
     print("Prices updated at ",datetime.datetime.now())
-    time.sleep(120)
+    time.sleep(30)
     
 
 
