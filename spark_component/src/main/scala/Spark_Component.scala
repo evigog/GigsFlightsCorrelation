@@ -70,24 +70,27 @@ object FlightGigs{
     //gig_flight.print()
 
     // STEP5: compute avg price per different key and updateState
-    val update_state = (key: (String,DateTime), value: Option[(Event, Flight_Info)], state: State[(Double,Integer)]) => {
-        val newPrice_any = value.getOrElse(0) //Any type
-        val newPrice = { newPrice_any match {
-            case tuple @ (a: Event, b: Flight_Info) => b.price
-          }
-        }
-        val oldState_any = state.getOption.getOrElse(0) //Any type
-        val oldState = { oldState_any match {
-            case tuple @ (a: Double, b: Integer) => (a, b)
-          }
-        }
+    def update_state (key: (String,DateTime), value: Option[(Event, Flight_Info)], state: State[(Double, Integer)]) :Option[((String,DateTime), Double)] = {
+      val v = value.get
+      val newPrice = v._2.price
+      if (state.exists()) {
+        val oldState = state.get()
         val sum = newPrice + oldState._1
         val count = oldState._2 + 1
-        state.update((sum, count))
-        (key, sum/count)
-      }
 
-    val avg_price_stream = gig_flight.mapWithState(StateSpec.function(update_state))
+      state.update((sum,count))
+      Some(key, (sum/count).toDouble)
+      }
+      else {
+        val sum = newPrice
+        val count = 1
+
+      state.update((sum,count))
+      Some(key, (sum/count).toDouble)
+      }
+    }
+
+    val avg_price_stream = gig_flight.mapWithState(StateSpec.function(update_state _))
     avg_price_stream.print()
 //
 //    print("Hereeeeeeeeeeeeeee ",avg_price_stream.print())
