@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from songkick import *
 from datetime import date
 import datetime
@@ -11,7 +12,16 @@ songkick = Songkick(api_key="8lHl4On4OYjHSxtr")
 
 targeted_artists = ['Mumford & Sons','Godsmack','The Vaccines','Bon Iver','Disturbed','Pink','Rod Stewart',
                     'Lana del Rey','Post Malone','Dave Matthews Band','Welshly Arms','Tool','Beirut',
-                    'Hot Chip','Manowar','Westlife','Tiësto','Blue October','Yann Tiersen']
+                    'Hot Chip','Manowar','Westlife','Tiësto','Blue October','Yann Tiersen','Massive Attack',
+                    'Rita Ora','Mastodon','Mark Knopfler','Yann Tiersen','Fleetwood Mac','Kiss','Hans Zimmer',
+                    'Thundercat','Apparat','Foreigner','Mark Knopfler','Keith Urban','Amine','Lukas Graham',
+                    'The Tallest Man On Earth','Jorge Drexler','Flogging Molly','Louis the Child','Madeintyo',
+                    'Deer Tick','Morat','Sharon Van Etten','Tash Sultana','David Gray','Skepta',
+                    'Teenage Fanclub','Madeintyo','Manowar','Deer Tick','Little Mix','Manic Street Preachers',
+                    'Brett Eldredge','Lukas Graham','Slipknot','Shaggy','Gary Numan','Kimbra','Balthazar',
+                    'While She Sleeps','Dillon','Screaming Females','John Mayall','Public Service Broadcasting',
+                    'Subsonica ','Ex-Otago','Emis Killa','Roberto Cacciapaglia','Jesto','Nightmares On Wax',
+                    'Neneh Cherry','IAMX','Solar Fields','Jesse Cook',' Charlie Winston']
 popular_EU_locations = ['Berlin, Germany', 'Paris, France', 'Amsterdam, Netherlands', 'Barcelona, Spain', 
                 'Copenhagen, Denmark', 'Dublin, Ireland', 'Prague, Czech Republic', 'Rome, Italy', 'Budapest, Hungary']
 
@@ -53,6 +63,6 @@ while True:
                     concert_id += 1
       
     print("Events updated at ",datetime.datetime.now())
-    time.sleep(30)
+    time.sleep(20)
 
 
