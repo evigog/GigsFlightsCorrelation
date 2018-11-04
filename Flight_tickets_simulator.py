@@ -204,7 +204,7 @@ while True:
 
     update_data(prices_matrix,base_prices,init_date,track_days,cities_map)
     print("Prices updated at ",datetime.datetime.now())
-    time.sleep(30)
+    time.sleep(20)
     
 
 
